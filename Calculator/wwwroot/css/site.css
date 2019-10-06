@@ -1,0 +1,47 @@
+﻿/* Please see documentation at https://docs.microsoft.com/aspnet/core/client-side/bundling-and-minification
+for details on configuring this project to bundle and minify static web assets. */
+
+
+*{
+    box-sizing: border-box;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+}
+
+.grid-container {
+    height: 100vh;
+    display: grid;
+    grid-template-areas: "getdata calculator";
+    grid-template-columns: 30% 70%;
+}
+
+.getdata {
+    grid-area: getdata;
+    background-color: #ffffff;
+}
+
+.calculator {
+    grid-area: calculator;
+    background-color: #ccc;
+    grid-template-areas: "screen" "buttons";
+    grid-template-rows: 30% 70%;
+    display: inline-grid;
+}
+.screen {
+    grid-area: screen;
+    background-color: #bbbb;
+}
+.buttons {
+    font-size: 20px;
+    grid-area: buttons;
+    background-color: #ccc;
+    display: grid;
+    grid-template-columns: repeat(4,1fr);
+    grid-template-rows: repeat(6,1fr);
+}
+.numberbutton {
+    background-color: #fff;
+}
