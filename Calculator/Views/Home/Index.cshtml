@@ -34,3 +34,32 @@
         </div>
     </div>
 </div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        GetAllResults();
+    });
+    function GetAllResults() {
+        $.ajax({
+            url: '/api/home',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                WriteResponse(data);
+            },
+            error: function (x, y, z) {
+                alert(x + '\n' + y + '\n' + z);
+            }
+        });
+    }
+    function WriteResponse(calculatorresults) {
+        var strResult = "<table><th>ID</th><th>Название</th><th>Автор</th>";
+        $.each(calculatorresults, function (index, calculatorresult) {
+            strResult += "<tr><td>" + calculatorresult.id + "</td><td> " + calculatorresult.calculationString + "</td><td>" +
+                calculatorresult.result + "</td></tr>";
+        });
+        strResult += "</table>";
+        console.log(strResult);
+        $("#getdata").html(strResult);
+
+    }
+</script>

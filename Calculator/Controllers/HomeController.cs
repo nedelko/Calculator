@@ -8,6 +8,7 @@ using Calculator.Models;
 
 namespace Calculator.Controllers
 {
+    [Route("api/[controller]")]
     public class HomeController : Controller
     {
         private CalculatorContext db;
@@ -16,12 +17,30 @@ namespace Calculator.Controllers
             db = context;
         }
 
-        public IActionResult Index()
+        [HttpGet]
+        public IEnumerable<CalculatorResult> GetCalculatorResults()
         {
-            return View();
+            return db.CalculatorResults;
         }
 
-        public IActionResult Privacy()
+        [HttpPost]
+        public void CreateCalculatorResult([FromBody]CalculatorResult calculatorResult)
+        {
+            db.CalculatorResults.Add(calculatorResult);
+            db.SaveChanges();
+        }
+        [HttpDelete]
+        public void DeleteResults()
+        {
+            var rows = from result in db.CalculatorResults
+                       select result;
+            foreach (var row in rows)
+            {
+                db.CalculatorResults.Remove(row);
+            }
+            db.SaveChanges();
+        }
+        public IActionResult Index()
         {
             return View();
         }

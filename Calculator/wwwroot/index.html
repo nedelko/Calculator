@@ -1,0 +1,165 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Calculator</title>
+    <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+    <link rel="stylesheet" href="/css/site.css" />
+</head>
+<body>
+    <div class="grid-container">
+        <div class="getdata"></div>
+        <div class="calculator">
+            <div class="screen">
+                <label class="calculatorop"></label>
+                <label class="calculatorres">0</label>
+                <button onclick="delete_results()">MC</button>
+            </div>
+            <div class="buttons">
+                <button class="otherbuttons">%</button>
+                <button class="otherbuttons">&radic;</button>
+                <button class="otherbuttons">x&sup2;</button>
+                <button class="otherbuttons">1/x</button>
+                <button class="otherbuttons" onclick="clean_res_labels()">CE</button>
+                <button class="otherbuttons" onclick="clean_all_labels()">C</button>
+                <button class="otherbuttons">&lArr;</button>
+                <button class="otherbuttons" id="divide_button" onclick="tapped_plus_minus_divide_multiply(event)">&divide;</button>
+                <button class="numberbutton" onclick="number_tapped_event(event)">7</button>
+                <button class="numberbutton" onclick="number_tapped_event(event)">8</button>
+                <button class="numberbutton" onclick="number_tapped_event(event)">9</button>
+                <button class="otherbuttons" id="multiply_button" onclick="tapped_plus_minus_divide_multiply(event)">&times;</button>
+                <button class="numberbutton" onclick="number_tapped_event(event)">4</button>
+                <button class="numberbutton" onclick="number_tapped_event(event)">5</button>
+                <button class="numberbutton" onclick="number_tapped_event(event)">6</button>
+                <button class="otherbuttons" id="minus_button" onclick="tapped_plus_minus_divide_multiply(event)">-</button>
+                <button class="numberbutton" onclick="number_tapped_event(event)">1</button>
+                <button class="numberbutton" onclick="number_tapped_event(event)">2</button>
+                <button class="numberbutton" onclick="number_tapped_event(event)">3</button>
+                <button class="otherbuttons" id="plus_button" onclick="tapped_plus_minus_divide_multiply(event)">+</button>
+                <button class="otherbuttons">&plusmn;</button>
+                <button class="numberbutton">0</button>
+                <button class="otherbuttons">.</button>
+                <button class="otherbuttons" onclick="AddCalculatorResult()">=</button>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+        var calculationString = [];
+        var label_calculator_string = document.querySelector(".calculatorop");
+        var label_calculator_result = document.querySelector(".calculatorres");
+        var operation_tapped = false;
+        var number_tapped = true;
+        $(document).ready(function () {
+            GetAllResults();
+        });
+        function GetAllResults() {
+            $.ajax({
+                url: '/api/home',
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    WriteResponse(data);
+                },
+                error: function (x, y, z) {
+                    alert(x + '\n' + y + '\n' + z);
+                }
+            });
+        }
+        function WriteResponse(calculatorresults) {
+            var strResult = "<p>Operations</p>";
+            $.each(calculatorresults, function (index, calculatorresult) {
+                strResult += "<p>" + calculatorresult.calculationString + "=" + calculatorresult.result + "</p>";
+            });
+            $(".getdata").append(strResult);
+        }
+        function AddCalculatorResult() {
+            if (calculationString[calculationString.length - 1] == "+" || calculationString[calculationString.length - 1] == "-" || calculationString[calculationString.length - 1] == "/" || calculationString[calculationString.length - 1] == "*") {
+                label_calculator_string.innerText = label_calculator_string.innerText + label_calculator_result.innerText;
+            }
+            label_calculator_result.innerText = eval(label_calculator_string.innerText);
+            var calculatorResult = {
+                calculationString: label_calculator_string.innerText,
+                result: label_calculator_result.innerText
+            };
+            operation_tapped = true;
+            label_calculator_string.innerText = "";
+            calculationString = [];
+        $.ajax({
+            url: '/api/home/',
+            type: 'POST',
+            data: JSON.stringify(calculatorResult),
+            contentType: "application/json;charset=utf-8",
+            success: function (data) {
+                document.querySelector(".getdata").innerHTML = "";
+                GetAllResults();
+            },
+            error: function (x, y, z) {
+                alert(x + '\n' + y + '\n' + z);
+            }
+        });
+        }
+        function delete_results() {
+            $.ajax({
+            url: '/api/home/',
+            type: 'DELETE',
+            contentType: "application/json;charset=utf-8",
+            success: function (data) {
+                document.querySelector(".getdata").innerHTML = "";
+                GetAllResults();
+            },
+            error: function (x, y, z) {
+                alert(x + '\n' + y + '\n' + z);
+            }
+        });
+        }
+        function number_tapped_event(e) {
+            if (label_calculator_result.innerText == 0 || operation_tapped == true) {
+                label_calculator_result.innerText = e.target.innerText;
+                number_tapped = true;
+                operation_tapped = false;
+            }
+            else {
+                label_calculator_result.innerText = label_calculator_result.innerText + e.target.innerText;
+                number_tapped = true;
+            }
+        }
+        function tapped_plus_minus_divide_multiply(e) {
+            var sign;
+            if (e.target.id == "divide_button") { sign = "/"; }
+            else if (e.target.id == "multiply_button") { sign = "*"; }
+            else if (e.target.id == "plus_button") { sign = "+"; }
+            else { sign = "-"; }
+            if (label_calculator_string.innerText == "") {
+                label_calculator_string.innerText = label_calculator_result.innerText + sign;
+                calculationString.push(label_calculator_result.innerText);
+                calculationString.push(sign);
+                operation_tapped = true;
+            }
+            else if (number_tapped == true) {
+                label_calculator_string.innerText = label_calculator_string.innerText + label_calculator_result.innerText;
+                calculationResult = eval(label_calculator_string.innerText);
+                label_calculator_string.innerText = label_calculator_string.innerText + sign;
+                calculationString.push(label_calculator_result.innerText);
+                calculationString.push(sign);
+                label_calculator_result.innerText = calculationResult;
+                number_tapped = false;
+                operation_tapped = true;
+            }
+            else {
+                calculationString.pop();
+                calculationString.push(sign);
+                label_calculator_string.innerText = calculationString.join("");
+                operation_tapped = true;
+            }
+        }
+        function clean_all_labels() {
+            label_calculator_string.innerText = "";
+            label_calculator_result.innerText = 0;
+            calculationString = [];
+        }
+        function clean_res_labels() {
+            label_calculator_result.innerText = 0;
+        }
+    </script>
+</body>
+</html>

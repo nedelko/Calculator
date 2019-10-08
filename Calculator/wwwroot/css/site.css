@@ -21,6 +21,8 @@ html, body {
 .getdata {
     grid-area: getdata;
     background-color: #ffffff;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 .calculator {
@@ -33,9 +35,25 @@ html, body {
 .screen {
     grid-area: screen;
     background-color: #bbbb;
+    grid-template-areas: "calculatorop calculatorop calculatorop" "calculatorres calculatorres calculatorres" "mc empty empty";
+    display: grid;
+    grid-template-rows: 40% 40% 20%;
+    grid-template-columns: 10% 10% 80%;
+}
+.calculatorop{
+    grid-area: calculatorop;
+    text-align: right;
+    padding-right: 10px;
+    padding-top: 10px;
+}
+.calculatorres {
+    grid-area: calculatorres;
+    text-align: right;
+    padding-right: 10px;
+    padding-top: 10px;
+    font-size:32px;
 }
 .buttons {
-    font-size: 20px;
     grid-area: buttons;
     background-color: #ccc;
     display: grid;
@@ -44,4 +62,8 @@ html, body {
 }
 .numberbutton {
     background-color: #fff;
+    font-size:20px;
+}
+.otherbuttons{
+    font-size:20px;
 }
