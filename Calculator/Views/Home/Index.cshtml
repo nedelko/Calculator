@@ -3,63 +3,35 @@
 }
 
 <div class="grid-container">
-    <div class="getdata"></div>
-    <div class="calculator">
-        <div class="screen">Screen</div>
-        <div class="buttons">
-            <button>%</button>
-            <button>&radic;</button>
-            <button>x&sup2;</button>
-            <button>1/x</button>
-            <button>CE</button>
-            <button>C</button>
-            <button>&lArr;</button>
-            <button>&divide;</button>
-            <button class="numberbutton">7</button>
-            <button class="numberbutton">8</button>
-            <button class="numberbutton">9</button>
-            <button>&times;</button>
-            <button class="numberbutton">4</button>
-            <button class="numberbutton">5</button>
-            <button class="numberbutton">6</button>
-            <button>-</button>
-            <button class="numberbutton">1</button>
-            <button class="numberbutton">2</button>
-            <button class="numberbutton">3</button>
-            <button>+</button>
-            <button>&plusmn;</button>
-            <button class="numberbutton">0</button>
-            <button>.</button>
-            <button>=</button>
-        </div>
-    </div>
+    Go to INDEXhtml please (wwwroot). I tried to combine .NET Core Razor pages
+    with AJAX, but it didn't work for me. If I was able to make request WITHOUT AJAX,
+    I would create PartialView with data, and INDEXcshtml with Tag-helpers,
+    sending query to Controller and modifying only PartialView.
+    I know my issue isn't the most convenient and I would be glad to hear
+    your remarks. Thanks
 </div>
 <script type="text/javascript">
-    $(document).ready(function () {
-        GetAllResults();
-    });
-    function GetAllResults() {
-        $.ajax({
-            url: '/api/home',
-            type: 'GET',
-            dataType: 'json',
-            success: function (data) {
-                WriteResponse(data);
-            },
-            error: function (x, y, z) {
-                alert(x + '\n' + y + '\n' + z);
-            }
+        $(document).ready(function () {
+            GetAllResults();
         });
-    }
-    function WriteResponse(calculatorresults) {
-        var strResult = "<table><th>ID</th><th>Название</th><th>Автор</th>";
-        $.each(calculatorresults, function (index, calculatorresult) {
-            strResult += "<tr><td>" + calculatorresult.id + "</td><td> " + calculatorresult.calculationString + "</td><td>" +
-                calculatorresult.result + "</td></tr>";
-        });
-        strResult += "</table>";
-        console.log(strResult);
-        $("#getdata").html(strResult);
-
-    }
+        function GetAllResults() {
+            $.ajax({
+                url: '/api/home',
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    WriteResponse(data);
+                },
+                error: function (x, y, z) {
+                    alert(x + '\n' + y + '\n' + z);
+                }
+            });
+        }
+        function WriteResponse(calculatorresults) {
+            var strResult = "<p>Operations</p>";
+            $.each(calculatorresults, function (index, calculatorresult) {
+                strResult += "<p>" + calculatorresult.calculationString + "=" + calculatorresult.result + "</p>";
+            });
+            $(".getdata").append(strResult);
+        }
 </script>
