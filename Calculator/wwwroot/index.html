@@ -16,13 +16,13 @@
                 <button onclick="delete_results()">MC</button>
             </div>
             <div class="buttons">
-                <button class="otherbuttons">%</button>
+                <button class="otherbuttons" id="percent">%</button>
                 <button class="otherbuttons">&radic;</button>
                 <button class="otherbuttons">x&sup2;</button>
                 <button class="otherbuttons">1/x</button>
                 <button class="otherbuttons" onclick="clean_res_labels()">CE</button>
                 <button class="otherbuttons" onclick="clean_all_labels()">C</button>
-                <button class="otherbuttons">&lArr;</button>
+                <button class="otherbuttons" onclick="reduce_number()">&lArr;</button>
                 <button class="otherbuttons" id="divide_button" onclick="tapped_plus_minus_divide_multiply(event)">&divide;</button>
                 <button class="numberbutton" onclick="number_tapped_event(event)">7</button>
                 <button class="numberbutton" onclick="number_tapped_event(event)">8</button>
@@ -36,9 +36,9 @@
                 <button class="numberbutton" onclick="number_tapped_event(event)">2</button>
                 <button class="numberbutton" onclick="number_tapped_event(event)">3</button>
                 <button class="otherbuttons" id="plus_button" onclick="tapped_plus_minus_divide_multiply(event)">+</button>
-                <button class="otherbuttons">&plusmn;</button>
-                <button class="numberbutton">0</button>
-                <button class="otherbuttons">.</button>
+                <button class="otherbuttons" onclick="change_plus_minus()">&plusmn;</button>
+                <button class="numberbutton" onclick="zero_tapped()">0</button>
+                <button class="otherbuttons" onclick="add_point()">.</button>
                 <button class="otherbuttons" onclick="AddCalculatorResult()">=</button>
             </div>
         </div>
@@ -73,30 +73,33 @@
             $(".getdata").append(strResult);
         }
         function AddCalculatorResult() {
-            if (calculationString[calculationString.length - 1] == "+" || calculationString[calculationString.length - 1] == "-" || calculationString[calculationString.length - 1] == "/" || calculationString[calculationString.length - 1] == "*") {
-                label_calculator_string.innerText = label_calculator_string.innerText + label_calculator_result.innerText;
+            if (label_calculator_string.innerText != "") {
+                if (calculationString[calculationString.length-1] == "+" || calculationString[calculationString.length-1] == "-" || calculationString[calculationString.length-1] == "/" || calculationString[calculationString.length-1] == "*") {
+                    if (label_calculator_result.innerText.charAt(0) == "-") { label_calculator_string.innerText = label_calculator_string.innerText + "(" + label_calculator_result.innerText + ")"; }
+                    else { label_calculator_string.innerText = label_calculator_string.innerText + label_calculator_result.innerText; }
+                }
+                label_calculator_result.innerText = eval(label_calculator_string.innerText);
+                var calculatorResult = {
+                    calculationString: label_calculator_string.innerText,
+                    result: label_calculator_result.innerText
+                };
+                operation_tapped = true;
+                label_calculator_string.innerText = "";
+                calculationString = [];
+                $.ajax({
+                    url: '/api/home/',
+                    type: 'POST',
+                    data: JSON.stringify(calculatorResult),
+                    contentType: "application/json;charset=utf-8",
+                    success: function (data) {
+                        document.querySelector(".getdata").innerHTML = "";
+                        GetAllResults();
+                    },
+                    error: function (x, y, z) {
+                        alert(x + '\n' + y + '\n' + z);
+                    }
+                });
             }
-            label_calculator_result.innerText = eval(label_calculator_string.innerText);
-            var calculatorResult = {
-                calculationString: label_calculator_string.innerText,
-                result: label_calculator_result.innerText
-            };
-            operation_tapped = true;
-            label_calculator_string.innerText = "";
-            calculationString = [];
-        $.ajax({
-            url: '/api/home/',
-            type: 'POST',
-            data: JSON.stringify(calculatorResult),
-            contentType: "application/json;charset=utf-8",
-            success: function (data) {
-                document.querySelector(".getdata").innerHTML = "";
-                GetAllResults();
-            },
-            error: function (x, y, z) {
-                alert(x + '\n' + y + '\n' + z);
-            }
-        });
         }
         function delete_results() {
             $.ajax({
@@ -113,7 +116,7 @@
         });
         }
         function number_tapped_event(e) {
-            if (label_calculator_result.innerText == 0 || operation_tapped == true) {
+            if (label_calculator_result.innerText == "0" || operation_tapped == true) {
                 label_calculator_result.innerText = e.target.innerText;
                 number_tapped = true;
                 operation_tapped = false;
@@ -121,6 +124,18 @@
             else {
                 label_calculator_result.innerText = label_calculator_result.innerText + e.target.innerText;
                 number_tapped = true;
+            }
+        }
+        function zero_tapped() {
+            if (operation_tapped == true) {
+                label_calculator_result.innerText = "0";
+                number_tapped = true;
+                operation_tapped = false;
+            }
+            else if (label_calculator_result.innerText != 0) {
+                label_calculator_result.innerText = label_calculator_result.innerText + "0";
+                number_tapped = true;
+                operation_tapped = false;
             }
         }
         function tapped_plus_minus_divide_multiply(e) {
@@ -133,23 +148,54 @@
                 label_calculator_string.innerText = label_calculator_result.innerText + sign;
                 calculationString.push(label_calculator_result.innerText);
                 calculationString.push(sign);
-                operation_tapped = true;
+                number_tapped = false;
             }
             else if (number_tapped == true) {
-                label_calculator_string.innerText = label_calculator_string.innerText + label_calculator_result.innerText;
-                calculationResult = eval(label_calculator_string.innerText);
-                label_calculator_string.innerText = label_calculator_string.innerText + sign;
-                calculationString.push(label_calculator_result.innerText);
+                if (label_calculator_result.innerText.charAt(0) == "-") {
+                    label_calculator_string.innerText = label_calculator_string.innerText + "(" + label_calculator_result.innerText + ")";
+                    calculationString.push("(" + label_calculator_result.innerText + ")");
+                }
+                else {
+                    label_calculator_string.innerText = label_calculator_string.innerText + label_calculator_result.innerText;
+                    calculationString.push(label_calculator_result.innerText);
+                }
                 calculationString.push(sign);
-                label_calculator_result.innerText = calculationResult;
+                label_calculator_result.innerText = eval(label_calculator_string.innerText);
+                label_calculator_string.innerText = label_calculator_string.innerText + sign;
                 number_tapped = false;
-                operation_tapped = true;
             }
             else {
                 calculationString.pop();
                 calculationString.push(sign);
                 label_calculator_string.innerText = calculationString.join("");
-                operation_tapped = true;
+            }
+            operation_tapped = true;
+        }
+        function change_plus_minus() {
+            if (label_calculator_result.innerText != "0") {
+                if (label_calculator_result.innerText.charAt(0) == "-") {
+                    var change_plus_minus = label_calculator_result.innerText.split("");
+                    label_calculator_result.innerText = change_plus_minus.slice(1).join("");
+                }
+                else {
+                    label_calculator_result.innerText = "-" + label_calculator_result.innerText;
+                }
+            }
+        }
+        function add_point() {
+            if (label_calculator_result.innerText.indexOf('.') == "-1") {
+                label_calculator_result.innerText = label_calculator_result.innerText + ".";
+                operation_tapped = false;
+            }
+        }
+        function reduce_number() {
+            if (label_calculator_result.innerText != "0") {
+                var reduce_number_array = label_calculator_result.innerText.split("");
+                if (reduce_number_array.length == 1) { label_calculator_result.innerText = "0"; }
+                else if (reduce_number_array.length == 2 && reduce_number_array[0] == "-") { label_calculator_result.innerText = "0"; }
+                else {
+                    label_calculator_result.innerText = reduce_number_array.slice(0, reduce_number_array.length - 1).join("");
+                }
             }
         }
         function clean_all_labels() {
